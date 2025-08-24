@@ -11,7 +11,7 @@ app = customtkinter.CTk()
 app.title("my app")
 app.geometry("1000x700")
 app.title("Blackjack")
-app.configure(fg_color="#fafafa")
+app.configure(fg_color="#ffffff")
 
 def welcome_game():
     label = customtkinter.CTkLabel(app, text="Welcome to Blackjack!", font=("Arial", 24))
@@ -35,6 +35,9 @@ def start_game():
         app, text="Stand", command=stand, width=60, height=60)
     stand_button.place(relx=0.6, rely=0.8, anchor="center")
     blackjack_verify()
+    if blackjack_verify() == "Both you and the dealer have BlackJack!\nIt's a draw!" or blackjack_verify() == "BlackJack!\nYou won!" or blackjack_verify() == "BlackJack!\nYou lost!":
+        hit_button.configure(state="disabled")
+        stand_button.configure(state="disabled")
 
 
 
@@ -112,6 +115,7 @@ def blackjack_verify():
     if message:
         result_label = customtkinter.CTkLabel(app, text=message, font=("Arial", 18))
         result_label.place(relx=0.5, rely=0.9, anchor="center")
+    return message
 
 def above_21_verify():
 
