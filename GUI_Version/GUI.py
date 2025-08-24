@@ -4,7 +4,8 @@ import customtkinter
 from backgroundG import Card
 from winconditG import blackjack, above_21, result
 
-
+global hit_button
+global stand_button
 
 app = customtkinter.CTk()
 app.title("my app")
@@ -20,18 +21,19 @@ def welcome_game():
     label.after(3000, start_game)  
 
 def start_game():
+    global hit_button, stand_button
     label = customtkinter.CTkLabel(app, text="Let's start the game!", font=("Arial", 24))
     label.place(relx=0.5, rely=0.1, anchor="center")
     Card.choosing()
     Card.choosing()
     show_user()
     show_dealer()
-    button2 = customtkinter.CTkButton(
+    hit_button = customtkinter.CTkButton(
         app, text="Hit", command=hit, width=60, height=60)
-    button2.place(relx=0.4, rely=0.8, anchor="center")
-    button3 = customtkinter.CTkButton(
+    hit_button.place(relx=0.4, rely=0.8, anchor="center")
+    stand_button = customtkinter.CTkButton(
         app, text="Stand", command=stand, width=60, height=60)
-    button3.place(relx=0.6, rely=0.8, anchor="center")
+    stand_button.place(relx=0.6, rely=0.8, anchor="center")
     blackjack_verify()
 
 
@@ -57,23 +59,49 @@ def show_dealer():
     label.configure(text=card_label)
     label.place(relx=0.7, rely=0.5, anchor="center")
 
+
+# Create the label once (outside of the hit() function)
+hit_label = customtkinter.CTkLabel(app, text="", font=("Arial", 18))
+hit_label.place(relx=0.5, rely=0.7, anchor="center")
+hit_label.place_forget()  # Hide it initially
+
+
 def hit():
+    global hit_button
     label = Card.take_anther_one("hit")
     if label:
-        hit_label = customtkinter.CTkLabel(app, text=label, font=("Arial", 18))
+        hit_button.configure(state="disabled")  # Disable the button
+
+        hit_label.configure(text=label)
         hit_label.place(relx=0.5, rely=0.7, anchor="center")
-        hit_label.after(2500, hit_label.place_forget)
+
+        def reset():
+            hit_label.place_forget()
+            hit_button.configure(state="normal")  # Re-enable button
+
+        # After 2.5s, hide label and re-enable button
+        if above_21_verify() != "stop":
+            hit_label.after(2500, reset)
         show_user()
         above_21_verify()
         blackjack_verify()
 
+
 def stand():
     from dealertakeG import dealer_take
     label = dealer_take()
+
     if label:
-        dealer_label = customtkinter.CTkLabel(app, text=label, font=("Arial", 18))
+        # Disable the stand button
+        stand_button.configure(state="disabled")
+        hit_button.configure(state="disabled")
+
+        dealer_label = customtkinter.CTkLabel(
+            app, text=label, font=("Arial", 18))
         dealer_label.place(relx=0.5, rely=0.7, anchor="center")
+
         dealer_label.after(2500, dealer_label.place_forget)
+
         show_dealer()
         result_verify()
 
@@ -86,11 +114,16 @@ def blackjack_verify():
         result_label.place(relx=0.5, rely=0.9, anchor="center")
 
 def above_21_verify():
+
     user = Card.card_shown[0]["total_value"]
     message = above_21(user)
+    if above_21(user) == "You lost! Your total is over 21.":
+        hit_button.configure(state="disabled")
+        stand_button.configure(state="disabled")
     if message:
         result_label = customtkinter.CTkLabel(app, text=message, font=("Arial", 18))
         result_label.place(relx=0.5, rely=0.9, anchor="center")
+    return "stop"
 
 def result_verify():
     user = Card.card_shown[0]["total_value"]
