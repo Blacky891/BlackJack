@@ -2,6 +2,8 @@
 
 import customtkinter
 from backgroundG import Card
+from winconditG import blackjack, above_21, result
+
 
 
 app = customtkinter.CTk()
@@ -30,6 +32,8 @@ def start_game():
     button3 = customtkinter.CTkButton(
         app, text="Stand", command=stand, width=60, height=60)
     button3.place(relx=0.6, rely=0.8, anchor="center")
+    blackjack_verify()
+
 
 
 
@@ -60,6 +64,8 @@ def hit():
         hit_label.place(relx=0.5, rely=0.7, anchor="center")
         hit_label.after(2500, hit_label.place_forget)
         show_user()
+        above_21_verify()
+        blackjack_verify()
 
 def stand():
     from dealertakeG import dealer_take
@@ -69,6 +75,30 @@ def stand():
         dealer_label.place(relx=0.5, rely=0.7, anchor="center")
         dealer_label.after(2500, dealer_label.place_forget)
         show_dealer()
+        result_verify()
+
+def blackjack_verify():
+    user = Card.card_shown[0]["total_value"]
+    dealer = Card.card_shown[1]["total_value"]
+    message = blackjack(user, dealer)
+    if message:
+        result_label = customtkinter.CTkLabel(app, text=message, font=("Arial", 18))
+        result_label.place(relx=0.5, rely=0.9, anchor="center")
+
+def above_21_verify():
+    user = Card.card_shown[0]["total_value"]
+    message = above_21(user)
+    if message:
+        result_label = customtkinter.CTkLabel(app, text=message, font=("Arial", 18))
+        result_label.place(relx=0.5, rely=0.9, anchor="center")
+
+def result_verify():
+    user = Card.card_shown[0]["total_value"]
+    dealer = Card.card_shown[1]["total_value"]
+    message = result(user, dealer)
+    if message:
+        result_label = customtkinter.CTkLabel(app, text=message, font=("Arial", 18))
+        result_label.place(relx=0.5, rely=0.9, anchor="center")
 
         
 
